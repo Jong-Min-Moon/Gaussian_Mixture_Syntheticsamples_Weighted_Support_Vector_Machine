@@ -1,0 +1,30 @@
+#install.packages("cluster")
+#install.packages("fpc")
+library("cluster")
+library("fpc")
+library("caret")
+rcode_dir <- getwd( ) # Please change this directory to the appropriate one.
+
+source(paste0(rcode_dir, "/distortion_curve.R"))
+
+#read data
+real_data <-read.csv("/Users/jmmoon/Documents/GitHub/forest_fire_ROK_army/experiment/army_fire.csv")
+real_data_x <- real_data[1:4]
+
+#standard scaling
+real_data_x_stanscale <- scale(real_data_x)# perform normalization
+real_data_x_stanscale_pos <- real_data_x_stanscale[real_data$y==1,]
+
+# Gap statistic
+gap_result <- cluster::clusGap(x=real_data_x_scaled_pos, FUNcluster = kmeans_many_init, B=100, K.max=30, d.power = 2)
+print(gap_result, method = "Tibs2001SEmax", SE.factor = 1)
+plot(gap_result, method = "Tibs2001SEmax", SE.factor = 1)
+
+
+# Jump statistic
+set.seed(1)
+temp <- jump(data = real_data_x_stanscale_pos,
+             y=c(0.5, 0.75, 1, 2),
+             rand=1000,
+             trace=F)
+temp
